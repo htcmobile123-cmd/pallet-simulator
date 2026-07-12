@@ -1,0 +1,94 @@
+import { useState } from "react";
+import Simulator from "./Simulator.jsx";
+
+const T = {
+  bg: "#111317",
+  panel: "#181B21",
+  panel2: "#1E222A",
+  line: "#2A2F39",
+  text: "#E8EAED",
+  dim: "#8B93A1",
+  accent: "#4FD1A5",
+  red: "#E5636B",
+};
+const mono = "'SF Mono','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace";
+const sans = "'Inter',system-ui,sans-serif";
+
+/* NOTE: simple front-end gate to keep casual visitors out.
+   Credentials live in client code, so do not treat this as real security. */
+const USER = "admin";
+const PASS = "admin";
+
+export default function App() {
+  const [authed, setAuthed] = useState(
+    () => sessionStorage.getItem("fix3rd_auth") === "1"
+  );
+  const [u, setU] = useState("");
+  const [p, setP] = useState("");
+  const [err, setErr] = useState(false);
+
+  const login = () => {
+    if (u.trim() === USER && p === PASS) {
+      sessionStorage.setItem("fix3rd_auth", "1");
+      setAuthed(true);
+    } else {
+      setErr(true);
+    }
+  };
+
+  if (authed) return <Simulator />;
+
+  return (
+    <div className="min-h-screen w-full flex items-center justify-center px-4"
+      style={{ background: T.bg, fontFamily: sans }}>
+      <div className="w-full max-w-sm rounded-2xl p-8"
+        style={{ background: T.panel, border: `1px solid ${T.line}` }}>
+        <div className="text-xs tracking-widest uppercase"
+          style={{ color: T.accent, fontFamily: mono }}>
+          FiX3RD · Internal Tool
+        </div>
+        <h1 className="mt-1 text-xl font-semibold" style={{ color: T.text }}>
+          Smart Pallet Load Simulator
+        </h1>
+        <p className="mt-1 text-xs" style={{ color: T.dim }}>
+          Please sign in to continue.
+        </p>
+
+        <div className="mt-6 flex flex-col gap-3">
+          <label className="flex flex-col gap-1 text-xs" style={{ color: T.dim }}>
+            Username
+            <input value={u} autoComplete="username"
+              onChange={(e) => { setU(e.target.value); setErr(false); }}
+              onKeyDown={(e) => e.key === "Enter" && login()}
+              className="rounded-lg px-3 py-2.5 outline-none"
+              style={{ background: T.bg, color: T.text, border: `1px solid ${err ? T.red : T.line}` }} />
+          </label>
+          <label className="flex flex-col gap-1 text-xs" style={{ color: T.dim }}>
+            Password
+            <input type="password" value={p} autoComplete="current-password"
+              onChange={(e) => { setP(e.target.value); setErr(false); }}
+              onKeyDown={(e) => e.key === "Enter" && login()}
+              className="rounded-lg px-3 py-2.5 outline-none"
+              style={{ background: T.bg, color: T.text, border: `1px solid ${err ? T.red : T.line}` }} />
+          </label>
+
+          {err && (
+            <div className="text-xs" style={{ color: T.red }}>
+              Incorrect username or password.
+            </div>
+          )}
+
+          <button onClick={login}
+            className="mt-2 w-full py-3 rounded-xl text-sm font-semibold transition-transform active:scale-95"
+            style={{ background: T.accent, color: "#0C1712", border: `1px solid ${T.accent}` }}>
+            Sign in
+          </button>
+        </div>
+
+        <p className="mt-6 text-xs" style={{ color: T.dim, fontFamily: mono }}>
+          FiX3RD Co., Ltd. · www.fix3rd.com
+        </p>
+      </div>
+    </div>
+  );
+}
